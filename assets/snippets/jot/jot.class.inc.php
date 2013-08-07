@@ -18,7 +18,6 @@ class CJot {
 		if (!class_exists('CChunkie'))
 			include_once($path . '/includes/chunkie.class.inc.php');
 		$this->name = $this->config["snippet"]["name"] = "Jot";
-		$this->client = $modx->getUserData();
 		$this->_ctime = time();
 		$this->_check = 0;
 		$this->provider = new CJotDataDb;
@@ -118,9 +117,9 @@ class CJot {
 		$this->config["user"]["usrid"] = intval($_SESSION['webInternalKey']);
 		$this->config["user"]["id"] = (	$this->config["user"]["usrid"] > 0 ) ? (-$this->config["user"]["usrid"]) : $this->config["user"]["mgrid"];
 
-		$this->config["user"]["host"] = $this->client['ip'];
-		$this->config["user"]["ip"] = $this->client['ip'];
-		$this->config["user"]["agent"] = $this->client['ua'];
+		$this->config["user"]["host"] = $_SERVER['REMOTE_ADDR'];
+		$this->config["user"]["ip"] = $_SERVER['REMOTE_ADDR'];
+		$this->config["user"]["agent"] = $_SERVER['HTTP_USER_AGENT'];
 		$this->config["user"]["sechash"] = md5($this->config["user"]["id"].$this->config["user"]["host"].$this->config["user"]["ip"].$this->config["user"]["agent"]);
 		
 		// Automatic settings
@@ -630,10 +629,22 @@ class CJot {
 					$tpl->AddVar("comment",$comment);
 					$tpl->AddVar("recipient",$user);
 					$mail = new PHPMailer();
-					$mail->IsMail();
+					
+                    //add smtp method by Dmi3yy
+                    if ($modx->config['email_method'] == 'smtp') {
+						$mail->IsSMTP();// отсылать используя SMTP
+						$mail->Host	 = $modx->config['email_host']; // SMTP сервер
+						$mail->SMTPAuth = true;	 // включить SMTP аутентификацию
+						$mail->Username = $modx->config['email_smtp_sender']; // SMTP username
+						$mail->Password = $modx->config['email_pass']; // SMTP password
+						$mail->From		= $modx->config['email_smtp_sender'];
+						$mail->Port     = $modx->config['email_port'];
+					}else{
+						$mail->IsMail();
+						$mail->From     = $modx->config["emailsender"];
+					}
 					$mail->CharSet = $modx->config["modx_charset"]; 
-					$mail->IsHTML(false);
-					$mail->From = $modx->config["emailsender"];
+					$mail->IsHTML(false);	
 					$mail->FromName = $modx->config["site_name"];
 					$mail->Subject = $subject;
 					$mail->Body = $tpl->Render();

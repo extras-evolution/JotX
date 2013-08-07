@@ -15,7 +15,6 @@
 	$onBeforeValidateFormField='nolink';
 
 	$onBeforeFirstRun='subscribe';
-	$onFirstRun='rating';
 	$onSaveComment='subscribe';
 	$onBeforeRunActions='subscribe';
 	$onBeforeProcessPassiveActions='subscribe';
@@ -24,7 +23,7 @@
 	$onBeforeNotify='subscribe';
 	
 	$onSetCommentsOutput='ajax';
-	$onReturnOutput='rating,ajax';
+	$onReturnOutput='ajax';
 	
 	$tplForm = '@CODE:
 <div id="respond-[+jot.link.id+]" class="jot-form-wrap">
@@ -62,16 +61,16 @@
 	
 	[+form.moderation:is=`1`:then=`
 	<div class="jot-info">
-		<b>Создан:</b> [+form.field.createdon:date=`%d %b %Y в %H:%M`+]<br />
+		<b>Создан:</b> [+form.field.createdon:date=`%d.%m.%Y в %H:%M`+]<br />
 		<b>Автор:</b> [+form.field.createdby:userinfo=`username`:ifempty=`[+jot.guestname+]`+]<br />
 		<b>IP:</b> [+form.field.secip+]<br />
 		<b>Опубликовано:</b> [+form.field.published:select=`0=Нет&1=Да`+]<br />
 		[+form.field.publishedon:gt=`0`:then=`
-		<b>Дата публикации:</b> [+form.field.publishedon:date=`%d %b %Y в %H:%M`+]<br />
+		<b>Дата публикации:</b> [+form.field.publishedon:date=`%d.%m.%Y в %H:%M`+]<br />
 		<b>Опубликовал:</b> [+form.field.publishedby:userinfo=`username`:ifempty=` - `+]<br />
 		`+]
 		[+form.field.editedon:gt=`0`:then=`
-		<b>Дата изменения:</b> [+form.field.editedon:date=`%d %b %Y в %H:%M`+]<br />
+		<b>Дата изменения:</b> [+form.field.editedon:date=`%d.%m.%Y в %H:%M`+]<br />
 		<b>Редактировал:</b> [+form.field.editedby:userinfo=`username`:ifempty=` -`+]<br />
 		`+]
 	</div>
@@ -116,11 +115,6 @@
 	<a name="jc[+jot.link.id+][+comment.id+]"></a>
 	<div class="jot-row [+chunk.rowclass+] [+comment.published:is=`0`:then=`jot-row-up`+]">
 		<div class="jot-comment-head">
-			<div class="jot-vote">
-				<a class="jot-btn jot-btn-down" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=down">-</a>
-				<span class="jot-btn jot-rating [+comment.rating:gt=`0`:then=`jot-p`+][+comment.rating:lt=`0`:then=`jot-n`+]">[+comment.rating+]</span>
-				<a class="jot-btn jot-btn-up" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=up">+</a>
-			</div>
 			<div class="jot-mod">
 				[+jot.user.canedit:is=`1`:and:if=`[+comment.createdby+]`:is=`[+jot.user.id+]`:or:if=`[+jot.moderation.enabled+]`:is=`1`:then=`
 					<a class="jot-btn jot-btn-edit" href="[+jot.link.edit:esc+][+jot.querykey.id+]=[+comment.id+]#jf[+jot.link.id+]" title="Изменить"><i class="jot-icon-edit"></i> Изменить</a>
@@ -133,7 +127,7 @@
 			</div>
 			<div class="jot-avatar" [+comment.createdby:ne=`0`:then=`title="Ответов: [+comment.userpostcount+]"`+]><img src="http://www.gravatar.com/avatar/[+comment.email:ifempty=`[+comment.custom.email+]`:lcase:md5+]?s=24&amp;d=mm&amp;r=g" alt="" /></div>
 			<span class="jot-name">[+comment.username:ifempty=`[+comment.custom.name:ifempty=`[+jot.guestname+]`:esc+]`+] [+jot.moderation.enabled:is=`1`:then=`<span class="jot-extra"><a target="_blank" href="http://www.ripe.net/perl/whois?searchtext=[+comment.secip+]">([+comment.secip+])</a></span>`+]</span>
-			<span class="jot-date">[+comment.createdon:date=`%d %b %Y в %H:%M`+]</span>
+			<span class="jot-date">[+comment.createdon:date=`%d.%m.%Y в %H:%M`+]</span>
 			<span class="jot-perma"><a rel="nofollow" title="Ссылка на комментарий" href="[+jot.link.current+]#jc[+jot.link.id+][+comment.id+]">#<!--[+comment.postnumber+]--></a></span>
 			[+comment.depth:lt=`[+jot.depth+]`:then=`
 			<span class="jot-reply"><a rel="nofollow" href="[+comment.parentlink+]#jf[+jot.link.id+]" onclick="return addComment.moveForm(\'[+jot.link.id+]\', \'[+comment.id+]\')">Ответить</a></span>
