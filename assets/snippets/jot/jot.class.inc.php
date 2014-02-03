@@ -18,6 +18,7 @@ class CJot {
 		if (!class_exists('CChunkie'))
 			include_once($path . '/includes/chunkie.class.inc.php');
 		$this->name = $this->config["snippet"]["name"] = "Jot";
+		$this->client = $modx->getUserData();
 		$this->_ctime = time();
 		$this->_check = 0;
 		$this->provider = new CJotDataDb;
@@ -74,6 +75,7 @@ class CJot {
 		$this->config["tagids"] = !is_null($this->Get("tagids")) ? $this->processTags($this->Get("tagids")) : $this->config["tagid"];
 		$this->config["userids"] = !is_null($this->Get("userids")) ? $this->processUsers($this->Get("userids")) : '*';
 		$this->config["pagination"] = !is_null($this->Get("pagination")) ? $this->Get("pagination") : 10; // Set pagination (0 = disabled, # = comments per page)
+		$this->config["pageAdjacents"] = !is_null($this->Get("pageAdjacents")) ? $this->Get("pageAdjacents") : 2; // Set number of pages before and after the current one
 		$this->config["captcha"] = !is_null($this->Get("captcha")) ? intval($this->Get("captcha")) : 0; // Set captcha (0 = disabled, 1 = enabled, 2 = enabled for not logged in users)
 		$this->config["postdelay"] = !is_null($this->Get("postdelay")) ? $this->Get("postdelay") : 15; // Set post delay in seconds
 		$this->config["guestname"] = !is_null($this->Get("guestname")) ? $this->Get("guestname") : "Гость"; // Set guestname if none is specified
@@ -117,9 +119,9 @@ class CJot {
 		$this->config["user"]["usrid"] = intval($_SESSION['webInternalKey']);
 		$this->config["user"]["id"] = (	$this->config["user"]["usrid"] > 0 ) ? (-$this->config["user"]["usrid"]) : $this->config["user"]["mgrid"];
 
-		$this->config["user"]["host"] = $_SERVER['REMOTE_ADDR'];
-		$this->config["user"]["ip"] = $_SERVER['REMOTE_ADDR'];
-		$this->config["user"]["agent"] = $_SERVER['HTTP_USER_AGENT'];
+		$this->config["user"]["host"] = $this->client['ip'];
+		$this->config["user"]["ip"] = $this->client['ip'];
+		$this->config["user"]["agent"] = $this->client['ua'];
 		$this->config["user"]["sechash"] = md5($this->config["user"]["id"].$this->config["user"]["host"].$this->config["user"]["ip"].$this->config["user"]["agent"]);
 		
 		// Automatic settings
@@ -165,6 +167,7 @@ class CJot {
 		$this->templates["navPage"] = !is_null($this->Get("tplNavPage")) ? $this->Get("tplNavPage") : $this->config["path"]."/templates/chunk.nav.page.inc.html";
 		$this->templates["navPageCur"] = !is_null($this->Get("tplNavPageCur")) ? $this->Get("tplNavPageCur") : $this->config["path"]."/templates/chunk.nav.pagecur.inc.html";
 		$this->templates["navPageSpl"] = !is_null($this->Get("tplNavPageSpl")) ? $this->Get("tplNavPageSpl") : '';
+		$this->templates["navPageDots"] = !is_null($this->Get("tplNavPageDots")) ? $this->Get("tplNavPageDots") : ' ... ';
 		
 		// Querystring keys
 		$this->config["querykey"]["action"] = "jot".$this->_idshort;
@@ -629,22 +632,10 @@ class CJot {
 					$tpl->AddVar("comment",$comment);
 					$tpl->AddVar("recipient",$user);
 					$mail = new PHPMailer();
-					
-                    //add smtp method by Dmi3yy
-                    if ($modx->config['email_method'] == 'smtp') {
-						$mail->IsSMTP();// отсылать используя SMTP
-						$mail->Host	 = $modx->config['email_host']; // SMTP сервер
-						$mail->SMTPAuth = true;	 // включить SMTP аутентификацию
-						$mail->Username = $modx->config['email_smtp_sender']; // SMTP username
-						$mail->Password = $modx->config['email_pass']; // SMTP password
-						$mail->From		= $modx->config['email_smtp_sender'];
-						$mail->Port     = $modx->config['email_port'];
-					}else{
-						$mail->IsMail();
-						$mail->From     = $modx->config["emailsender"];
-					}
+					$mail->IsMail();
 					$mail->CharSet = $modx->config["modx_charset"]; 
-					$mail->IsHTML(false);	
+					$mail->IsHTML(false);
+					$mail->From = $modx->config["emailsender"];
 					$mail->FromName = $modx->config["site_name"];
 					$mail->Subject = $subject;
 					$mail->Body = $tpl->Render();

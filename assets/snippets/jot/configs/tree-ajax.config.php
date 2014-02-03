@@ -1,29 +1,30 @@
 <?php
 	setlocale (LC_ALL, 'ru_RU.UTF-8');
-	$customfields='name,email';
-	$validate='name:Вы не написали своё имя,email:Неправильный e-mail:email,content:Вы не заполнили поле комментария';
-	$action='tree';
-	$sortby='createdon:a';
-	$cssFile='assets/snippets/jot/css/tree.css';
-	$js=1;
-	$jsFile='assets/snippets/jot/js/tree.js';
-	//$pagination=0;
-	$onDeleteComment='delthread';
-	
-	$onBeforePOSTProcess='antispam';
-	$onSetFormOutput='antispam,ajax';
-	$onBeforeValidateFormField='nolink';
+	$customfields = isset($customfields) ? $customfields : 'name,email';
+	$validate = isset($validate) ? $validate : 'name:Вы не написали своё имя,email:Неправильный e-mail:email,content:Вы не заполнили поле комментария';
+	$action = isset($action) ? $action : 'tree';
+	$sortby = isset($sortby) ? $sortby : 'createdon:a';
+	$cssFile = isset($cssFile) ? $cssFile : 'assets/snippets/jot/css/tree.css';
+	$js = isset($js) ? $js : 1;
+	$jsFile = isset($jsFile) ? $jsFile : 'assets/snippets/jot/js/tree.js';
 
-	$onBeforeFirstRun='subscribe';
-	$onSaveComment='subscribe';
-	$onBeforeRunActions='subscribe';
-	$onBeforeProcessPassiveActions='subscribe';
-	$onGetSubscriptions='subscribe';
-	$onBeforeGetUserInfo='subscribe';
-	$onBeforeNotify='subscribe';
+	$onDeleteComment = isset($onDeleteComment) ? $onDeleteComment : 'delthread';
 	
-	$onSetCommentsOutput='ajax';
-	$onReturnOutput='ajax';
+	$onBeforePOSTProcess = isset($onBeforePOSTProcess) ? $onBeforePOSTProcess : 'antispam';
+	$onSetFormOutput = isset($onSetFormOutput) ? $onSetFormOutput : 'antispam,ajax';
+	$onBeforeValidateFormField = isset($onBeforeValidateFormField) ? $onBeforeValidateFormField : 'nolink';
+
+	$onBeforeFirstRun = isset($onBeforeFirstRun) ? $onBeforeFirstRun : 'subscribe';
+	$onFirstRun = isset($onFirstRun) ? $onFirstRun : 'rating';
+	$onSaveComment = isset($onSaveComment) ? $onSaveComment : 'subscribe';
+	$onBeforeRunActions = isset($onBeforeRunActions) ? $onBeforeRunActions : 'subscribe';
+	$onBeforeProcessPassiveActions = isset($onBeforeProcessPassiveActions) ? $onBeforeProcessPassiveActions : 'subscribe';
+	$onGetSubscriptions = isset($onGetSubscriptions) ? $onGetSubscriptions : 'subscribe';
+	$onBeforeGetUserInfo = isset($onBeforeGetUserInfo) ? $onBeforeGetUserInfo : 'subscribe';
+	$onBeforeNotify = isset($onBeforeNotify) ? $onBeforeNotify : 'subscribe';
+	
+	$onSetCommentsOutput = isset($onSetCommentsOutput) ? $onSetCommentsOutput : 'ajax';
+	$onReturnOutput = isset($onReturnOutput) ? $onReturnOutput : 'rating,ajax';
 	
 	$tplForm = '@CODE:
 <div id="respond-[+jot.link.id+]" class="jot-form-wrap">
@@ -35,7 +36,7 @@
 [+form.error:select=`
 &-3=Вы пытаетесь отправить одно и то же сообщение. Возможно вы нажали кнопку отправки более одного раза.
 &-2=Ваше сообщение было отклонено.
-&-1=Ваше сообщение сохранено, оно будет опубликовано после просмотра администратором.
+&-1=Ваше сообщение сохранёно, оно будет опубликовано после просмотра администратором.
 &1=Вы пытаетесь отправить одно и то же сообщение. Возможно вы нажали кнопку отправки более одного раза.
 &2=Вы ввели неправильный защитный код.
 &3=Вы можете отправлять сообщения не чаще [+jot.postdelay+] секунд.
@@ -61,16 +62,16 @@
 	
 	[+form.moderation:is=`1`:then=`
 	<div class="jot-info">
-		<b>Создан:</b> [+form.field.createdon:date=`%d.%m.%Y в %H:%M`+]<br />
+		<b>Создан:</b> [+form.field.createdon:date=`%d %b %Y в %H:%M`+]<br />
 		<b>Автор:</b> [+form.field.createdby:userinfo=`username`:ifempty=`[+jot.guestname+]`+]<br />
 		<b>IP:</b> [+form.field.secip+]<br />
 		<b>Опубликовано:</b> [+form.field.published:select=`0=Нет&1=Да`+]<br />
 		[+form.field.publishedon:gt=`0`:then=`
-		<b>Дата публикации:</b> [+form.field.publishedon:date=`%d.%m.%Y в %H:%M`+]<br />
+		<b>Дата публикации:</b> [+form.field.publishedon:date=`%d %b %Y в %H:%M`+]<br />
 		<b>Опубликовал:</b> [+form.field.publishedby:userinfo=`username`:ifempty=` - `+]<br />
 		`+]
 		[+form.field.editedon:gt=`0`:then=`
-		<b>Дата изменения:</b> [+form.field.editedon:date=`%d.%m.%Y в %H:%M`+]<br />
+		<b>Дата изменения:</b> [+form.field.editedon:date=`%d %b %Y в %H:%M`+]<br />
 		<b>Редактировал:</b> [+form.field.editedby:userinfo=`username`:ifempty=` -`+]<br />
 		`+]
 	</div>
@@ -115,6 +116,11 @@
 	<a name="jc[+jot.link.id+][+comment.id+]"></a>
 	<div class="jot-row [+chunk.rowclass+] [+comment.published:is=`0`:then=`jot-row-up`+]">
 		<div class="jot-comment-head">
+			<div class="jot-vote">
+				<a class="jot-btn jot-btn-down" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=down">-</a>
+				<span class="jot-btn jot-rating [+comment.rating:gt=`0`:then=`jot-p`+][+comment.rating:lt=`0`:then=`jot-n`+]">[+comment.rating+]</span>
+				<a class="jot-btn jot-btn-up" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=up">+</a>
+			</div>
 			<div class="jot-mod">
 				[+jot.user.canedit:is=`1`:and:if=`[+comment.createdby+]`:is=`[+jot.user.id+]`:or:if=`[+jot.moderation.enabled+]`:is=`1`:then=`
 					<a class="jot-btn jot-btn-edit" href="[+jot.link.edit:esc+][+jot.querykey.id+]=[+comment.id+]#jf[+jot.link.id+]" title="Изменить"><i class="jot-icon-edit"></i> Изменить</a>
@@ -127,7 +133,7 @@
 			</div>
 			<div class="jot-avatar" [+comment.createdby:ne=`0`:then=`title="Ответов: [+comment.userpostcount+]"`+]><img src="http://www.gravatar.com/avatar/[+comment.email:ifempty=`[+comment.custom.email+]`:lcase:md5+]?s=24&amp;d=mm&amp;r=g" alt="" /></div>
 			<span class="jot-name">[+comment.username:ifempty=`[+comment.custom.name:ifempty=`[+jot.guestname+]`:esc+]`+] [+jot.moderation.enabled:is=`1`:then=`<span class="jot-extra"><a target="_blank" href="http://www.ripe.net/perl/whois?searchtext=[+comment.secip+]">([+comment.secip+])</a></span>`+]</span>
-			<span class="jot-date">[+comment.createdon:date=`%d.%m.%Y в %H:%M`+]</span>
+			<span class="jot-date">[+comment.createdon:date=`%d %b %Y в %H:%M`+]</span>
 			<span class="jot-perma"><a rel="nofollow" title="Ссылка на комментарий" href="[+jot.link.current+]#jc[+jot.link.id+][+comment.id+]">#<!--[+comment.postnumber+]--></a></span>
 			[+comment.depth:lt=`[+jot.depth+]`:then=`
 			<span class="jot-reply"><a rel="nofollow" href="[+comment.parentlink+]#jf[+jot.link.id+]" onclick="return addComment.moveForm(\'[+jot.link.id+]\', \'[+comment.id+]\')">Ответить</a></span>

@@ -37,7 +37,8 @@ function subscribe(&$object,$params){
 				$returnValue = intval($modx->db->getValue($sql));
 				if ($returnValue<1) {
 					$modx->db->insert(array("uparent"=>$object->fields["uparent"],"tagid"=>$object->fields["tagid"],"parent"=>$object->fields["parent"],"username"=>$username,"email"=>$email,"hash"=>$hash),$tbl);
-					setcookie('jot-hash', $hash, time() + 30000000, MODX_BASE_URL);
+					setcookie('jot-hash', $hash, time() + 30000000, $modx->makeUrl($modx->documentIdentifier));
+					$_COOKIE['jot-hash'] = $hash;
 				}
 			}
 			break;
@@ -61,7 +62,7 @@ function subscribe(&$object,$params){
 				$hash = $modx->db->escape($_GET["hash"]);
 				$query = $modx->db->delete($tbl,'hash="'.$hash.'"');
 				if ($query) {
-					setcookie('jot-hash', '', time() - 3600, MODX_BASE_URL);
+					setcookie('jot-hash', '', time() - 3600, $modx->makeUrl($modx->documentIdentifier));
 					$object->form["confirm"] = 4;
 					$object->form["subscribed"] = 0;
 				}
@@ -86,7 +87,7 @@ function subscribe(&$object,$params){
 		case "onBeforeNotify":
 			/* не отправлять свой комментарий */
 			$hash = isset($params["user"]["hash"]) ? $params["user"]["hash"] : '';
-			if (intval($_POST["subscribe"]) == 1 || (isset($_COOKIE['jot-hash']) && $_COOKIE['jot-hash'] == $hash) ) return true;
+			if (isset($_COOKIE['jot-hash']) && $_COOKIE['jot-hash'] == $hash) return true;
 			/* добавить хэш в шаблон */
 			if ($hash) $params["tpl"]->template = str_replace('[+jot.link.unsubscribe+]','[+jot.link.unsubscribe+]&hash='.$hash,$params["tpl"]->template);
 			elseif (!$object->config["subscribe"] && $params["action"]=="notify") return true;
