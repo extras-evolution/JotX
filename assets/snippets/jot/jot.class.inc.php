@@ -394,7 +394,7 @@ class CJot {
 		$formMode = $this->config["mode"]["passive"];	
 		$saveComment = 1;
 		$this->form["action"] = $this->config["link"]["current"];
-		if ($id && $pObj->isValidComment($this->config["docid"],$this->config["tagid"],$id) && $this->canEdit) {
+		if ($id && $pObj->isValidComment($this->config["docids"],$this->config["tagids"],$id) && $this->canEdit) {
 			$pObj->Comment($id);
 			if (($pObj->Get("createdby") == $this->config["user"]["id"]) || $this->isModerator) {
 				$this->form["action"] = $this->config["link"]["save"];
@@ -610,7 +610,27 @@ class CJot {
 				break;
 		}
 
-		include_once MODX_MANAGER_PATH . "includes/controls/class.phpmailer.php";
+		if ($modx->loadExtension('MODxMailer')){
+			$mail = $modx->mail;
+		} else {
+			include_once MODX_MANAGER_PATH . "includes/controls/class.phpmailer.php";
+			$mail = new PHPMailer();
+			//add smtp method by Dmi3yy
+			if ($modx->config['email_method'] == 'smtp') {
+				$mail->IsSMTP(); // отсылать используя SMTP
+				$mail->Host	 = $modx->config['email_host']; // SMTP сервер
+				$mail->SMTPAuth = true;	 // включить SMTP аутентификацию
+				$mail->Username = $modx->config['email_smtp_sender']; // SMTP username
+				$mail->Password = $modx->config['email_pass']; // SMTP password
+				$mail->From		= $modx->config['email_smtp_sender'];
+				$mail->Port     = $modx->config['email_port'];
+			}else{
+				$mail->IsMail();
+				$mail->From     = $modx->config["emailsender"];
+			}
+			$mail->CharSet = $modx->config["modx_charset"]; 
+			$mail->FromName = $modx->config["site_name"];
+		}
 		
 		foreach ($user_ids as $user_id){
 			if ($this->config["user"]["id"] !== $user_id) {
@@ -630,27 +650,12 @@ class CJot {
 					$tpl->AddVar("jot",$this->config);
 					$tpl->AddVar("comment",$comment);
 					$tpl->AddVar("recipient",$user);
-					$mail = new PHPMailer();
-					//add smtp method by Dmi3yy
-					if ($modx->config['email_method'] == 'smtp') {
-						$mail->IsSMTP(); // отсылать используя SMTP
-						$mail->Host	 = $modx->config['email_host']; // SMTP сервер
-						$mail->SMTPAuth = true;	 // включить SMTP аутентификацию
-						$mail->Username = $modx->config['email_smtp_sender']; // SMTP username
-						$mail->Password = $modx->config['email_pass']; // SMTP password
-						$mail->From		= $modx->config['email_smtp_sender'];
-						$mail->Port     = $modx->config['email_port'];
-					}else{
-						$mail->IsMail();
-						$mail->From     = $modx->config["emailsender"];
-					}
-					$mail->CharSet = $modx->config["modx_charset"]; 
 					$mail->IsHTML(false);
-					$mail->FromName = $modx->config["site_name"];
 					$mail->Subject = $subject;
 					$mail->Body = $tpl->Render();
 					$mail->AddAddress($user["email"]);
 					$mail->Send();
+					$mail->ClearAllRecipients();
 				}
 			}
 		}
@@ -660,7 +665,7 @@ class CJot {
 	function doModerate($action = '',$id = 0) {
 		$output = NULL;
 		$pObj = $this->provider;
-		if ($this->isModerator && $pObj->isValidComment($this->config["docid"],$this->config["tagid"],$id)) {
+		if ($this->isModerator && $pObj->isValidComment($this->config["docids"],$this->config["tagids"],$id)) {
 			switch ($action) {
 				case "delete":
 					$pObj->Comment($id);
