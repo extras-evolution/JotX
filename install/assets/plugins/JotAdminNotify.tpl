@@ -23,7 +23,7 @@ switch($e->name){
 		$table = $modx->getFullTableName('jot_content');
 		$sitecontent = $modx->getFullTableName('site_content');
 		$rs = $modx->db->query("SELECT count(jc.uparent) as count, jc.uparent, sc.pagetitle FROM $table jc left join $sitecontent sc on sc.id = uparent where jc.published=0 group by jc.uparent");
-		while($row=$modx->db->GetRow($rs)){
+		while ($row = $modx->db->getRow($rs)) {
 			if ($row['count']>0){
 				$id = $row['uparent'];
 				$count = $row['count'];
