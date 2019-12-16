@@ -98,7 +98,7 @@
 	<div class="jot-form-actions">
 		<button tabindex="[+jot.seed:math=`?+5`+]" class="jot-btn jot-btn-submit" type="submit">[+form.edit:is=`1`:then=`Сохранить`:else=`Отправить`+]</button>
 		[+form.edit:is=`1`:then=`
-		<button tabindex="[+jot.seed:math=`?+6`+]" class="jot-btn jot-btn-cancel" onclick="history.go(-1);return false;">Отмена</button>
+		<button tabindex="[+jot.seed:math=`?+6`+]" class="jot-btn jot-btn-cancel" data-type="cancel" onclick="history.go(-1);return false;">Отмена</button>
 		`+]
 		[+jot.user.id:is=`0`:then=`
 		<label class="jot-checkbox">
@@ -116,12 +116,14 @@
 	<a name="jc[+jot.link.id+][+comment.id+]"></a>
 	<div class="jot-row [+chunk.rowclass+] [+comment.published:is=`0`:then=`jot-row-up`+]">
 		<div class="jot-comment-head">
+			<!-- rating -->
 			<div class="jot-vote">
-				<a class="jot-btn jot-btn-down" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=down">-</a>
-				<span class="jot-btn jot-rating [+comment.rating:gt=`0`:then=`jot-p`+][+comment.rating:lt=`0`:then=`jot-n`+]">[+comment.rating+]</span>
-				<a class="jot-btn jot-btn-up" href="[+jot.link.navigation+]cid=[+comment.id+]&vote=up">+</a>
+				<span class="jot-btn jot-btn-down" data-type="vote" data-href="[+jot.link.navigation+]cid=[+comment.id+]&vote=down">-</span>
+				<span class="jot-btn jot-rating [+comment.rating:gt=`0`:then=`jot-p`+][+comment.rating:lt=`0`:then=`jot-n`+]" data-type="rating">[+comment.rating+]</span>
+				<span class="jot-btn jot-btn-up" data-type="vote" data-href="[+jot.link.navigation+]cid=[+comment.id+]&vote=up">+</span>
 			</div>
-			<div class="jot-mod">
+			<!-- /rating -->
+			<div class="jot-mod" data-type="mod">
 				[+jot.user.canedit:is=`1`:and:if=`[+comment.createdby+]`:is=`[+jot.user.id+]`:or:if=`[+jot.moderation.enabled+]`:is=`1`:then=`
 					<a class="jot-btn jot-btn-edit" href="[+jot.link.edit:esc+][+jot.querykey.id+]=[+comment.id+]#jf[+jot.link.id+]" title="Изменить"><i class="jot-icon-edit"></i> Изменить</a>
 				`:strip+]
@@ -131,8 +133,8 @@
 					<a class="jot-btn jot-btn-del" href="[+jot.link.delete:esc+][+jot.querykey.id+]=[+comment.id+]#jotmod[+jot.link.id+]" onclick="if(!confirm(\'Вы действительно хотите удалить это сообщение?\')){e=event||window.event;e.stopImmediatePropagation();e.preventDefault();}" title="Удалить"><i class="jot-icon-del"></i> Удалить</a>
 				`:strip+]
 			</div>
-			<div class="jot-avatar" [+comment.createdby:ne=`0`:then=`title="Ответов: [+comment.userpostcount+]"`+]><img src="http://www.gravatar.com/avatar/[+comment.email:ifempty=`[+comment.custom.email+]`:lcase:md5+]?s=24&amp;d=mm&amp;r=g" alt="" /></div>
-			<span class="jot-name">[+comment.username:ifempty=`[+comment.custom.name:ifempty=`[+jot.guestname+]`:esc+]`+] [+jot.moderation.enabled:is=`1`:then=`<span class="jot-extra"><a target="_blank" href="http://www.ripe.net/perl/whois?searchtext=[+comment.secip+]">([+comment.secip+])</a></span>`+]</span>
+			<div class="jot-avatar" [+comment.createdby:ne=`0`:then=`title="Ответов: [+comment.userpostcount+]"`+]><img src="//www.gravatar.com/avatar/[+comment.email:ifempty=`[+comment.custom.email+]`:lcase:md5+]?s=24&amp;d=mm&amp;r=g" alt="" /></div>
+			<span class="jot-name">[+comment.username:ifempty=`[+comment.custom.name:ifempty=`[+jot.guestname+]`:esc+]`+] [+jot.moderation.enabled:is=`1`:then=`<span class="jot-extra"><a target="_blank" href="//www.ripe.net/perl/whois?searchtext=[+comment.secip+]">([+comment.secip+])</a></span>`+]</span>
 			<span class="jot-date">[+comment.createdon:date=`%d.%m.%Y в %H:%M`+]</span>
 			<span class="jot-perma"><a rel="nofollow" title="Ссылка на комментарий" href="[+jot.link.current+]#jc[+jot.link.id+][+comment.id+]">#<!--[+comment.postnumber+]--></a></span>
 			[+comment.depth:lt=`[+jot.depth+]`:then=`
